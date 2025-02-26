@@ -1,0 +1,37 @@
+/* Fade-in animation for messages */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.msg_cotainer, .msg_cotainer_send {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Pulse animation for sending button when hover */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.send_btn:hover i {
+    animation: pulse 1s infinite;
+}
+
+/* Glow effect for active input */
+.type_msg:focus {
+    box-shadow: 0 0 10px rgba(82, 172, 255, 0.5) !important;
+}

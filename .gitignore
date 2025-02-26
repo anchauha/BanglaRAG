@@ -1,0 +1,8 @@
+# Python cache files
+__pycache__/
+
+# Virtual environments
+minarc_env/
+
+# Local data files
+backup/

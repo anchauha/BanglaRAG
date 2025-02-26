@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Chatbot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css">
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<link rel="stylesheet" type="text/css" href="static/animations.css">
+<body>
+    <div class="container-fluid h-100">
+        <div class="row justify-content-center h-100">
+            <div class="col-md-8 col-xl-6 chat">
+                <div class="card">
+                    <div class="card-header msg_head">
+                        <div class="d-flex bd-highlight">
+                            <div class="img_cont">
+                                <img src="static/bot.jpeg" class="rounded-circle user_img">
+                                <span class="online_icon"></span>
+                            </div>
+                            <div class="user_info">
+                                <span>Bangla AI</span>
+                                <p>Assess if your content about Bangladesh is culturally respectful.
+								</p>
+                            </div>
+                        </div>
+                        <button class="reset-btn" id="resetChat">
+                            <i class="fas fa-redo-alt"></i> Reset
+                        </button>
+                    </div>
+                    
+                    <div id="messageFormeight" class="card-body msg_card_body">
+                        <!-- Welcome message will be added here by JavaScript -->
+                    </div>
+                    
+                    <div class="card-footer">
+                        <form id="messageArea" class="input-group">
+                            <input type="text" id="text" name="msg" placeholder="Type your message..." autocomplete="off" class="form-control type_msg" required/>
+                            <div class="input-group-append">
+                                <button type="submit" id="send" class="input-group-text send_btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        $(document).ready(function() {
+            // Add a welcome message when the page loads
+            const date = new Date();
+            const hour = date.getHours();
+            const minute = date.getMinutes().toString().padStart(2, '0');
+            const str_time = hour + ":" + minute;
+            
+            const welcomeMessage = "Hello! I'm your Bangla Moderator. How can I help you today?";
+            const botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="static/bot.jpeg" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + welcomeMessage + '<span class="msg_time">' + str_time + '</span></div></div>';
+            $("#messageFormeight").append($.parseHTML(botHtml));
+            
+            // Handle message submission
+            $("#messageArea").on("submit", function(event) {
+                event.preventDefault();
+                
+                const date = new Date();
+                const hour = date.getHours();
+                const minute = date.getMinutes().toString().padStart(2, '0');
+                const str_time = hour + ":" + minute;
+                var rawText = $("#text").val();
+                
+                // Don't send empty messages
+                if (rawText.trim() === "") {
+                    return;
+                }
+                
+                // Display user message
+                var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + 
+                    rawText + '<span class="msg_time_send">'+ str_time + 
+                    '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
+                $("#messageFormeight").append(userHtml);
+                
+                // Clear input field
+                $("#text").val("");
+                
+                // Add typing indicator
+                const typingHtml = '<div id="typing-indicator" class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="static/bot.jpeg" class="rounded-circle user_img_msg"></div><div class="msg_cotainer"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>';
+                $("#messageFormeight").append(typingHtml);
+                
+                // Scroll to bottom
+                scrollToBottom();
+                
+                // Send request to server
+                $.ajax({
+                    data: {
+                        msg: rawText,
+                    },
+                    type: "POST",
+                    url: "/get",
+                }).done(function(data) {
+                                        // Remove typing indicator
+										$("#typing-indicator").remove();
+                    
+                    // Display bot response
+                    var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="static/bot.jpeg" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + data + '<span class="msg_time">' + str_time + '</span></div></div>';
+                    $("#messageFormeight").append($.parseHTML(botHtml));
+                    
+                    // Scroll to the latest message
+                    scrollToBottom();
+                });
+            });
+            
+            // Reset chat button
+            $("#resetChat").click(function() {
+                // Show a loading spinner in the chat area
+                $("#messageFormeight").html('<div class="text-center my-3"><i class="fas fa-spinner fa-spin text-white"></i></div>');
+                
+                // Call the reset endpoint
+                $.ajax({
+                    type: "POST",
+                    url: "/reset",
+                }).done(function(data) {
+                    // Clear all messages
+                    $("#messageFormeight").empty();
+                    
+                    // Add a new welcome message
+                    const date = new Date();
+                    const hour = date.getHours();
+                    const minute = date.getMinutes().toString().padStart(2, '0');
+                    const str_time = hour + ":" + minute;
+                    
+                    const welcomeMessage = "Chat has been reset. How can I help you today?";
+                    const botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="static/bot.jpeg" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + welcomeMessage + '<span class="msg_time">' + str_time + '</span></div></div>';
+                    $("#messageFormeight").append($.parseHTML(botHtml));
+                });
+            });
+            
+            // Function to scroll to the bottom of the chat
+            function scrollToBottom() {
+                var messageBody = document.querySelector('.msg_card_body');
+                messageBody.scrollTop = messageBody.scrollHeight;
+            }
+            
+            // Auto-resize input field as user types
+            $("#text").on("input", function() {
+                this.style.height = "auto";
+                this.style.height = (this.scrollHeight) + "px";
+            });
+        });
+    </script>
+</body>
+</html>
+

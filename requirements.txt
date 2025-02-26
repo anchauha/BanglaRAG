@@ -1,0 +1,16 @@
+flask
+transformers
+torch
+langchain
+chromadb
+langchain-text-splitters
+langchain-community
+langgraph
+langchain[openai]
+langchain-openai
+langchain-chroma
+langchain_community
+pypdf
+langgraph
+langchain-community
+Flask-Limiter
